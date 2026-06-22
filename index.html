@@ -47,10 +47,8 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:3p
   width:100%;background:var(--bg);border:1px solid var(--border);
   border-radius:5px;padding:4px 5px;color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;
-  text-align:right;-moz-appearance:textfield;
+  text-align:right;
 }
-.vrow-input::-webkit-inner-spin-button,
-.vrow-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .vrow-input:focus{outline:none;border-color:var(--accent)}
 
 /* ── RESULTS GRID ── */
@@ -139,23 +137,34 @@ IND.forEach(v=>{
   row.innerHTML=''
     +'<div class="vrow-name">'+v.name+unitLabel+'</div>'
     +'<input type="range" id="sr_'+v.id+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+S[v.id]+'">'
-    +'<input type="number" class="vrow-input" id="ni_'+v.id+'" value="'+S[v.id]+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'">';
+    +'<input type="text" inputmode="decimal" class="vrow-input" id="ni_'+v.id+'" value="'+String(S[v.id]).replace('.',',')+'">';
   slidersEl.appendChild(row);
 
   const slider=document.getElementById('sr_'+v.id);
   const numInput=document.getElementById('ni_'+v.id);
 
-  function applyVal(val){
-    val=Math.min(Math.max(parseFloat(val)||v.min,v.min),v.max);
-    S[v.id]=val;
-    slider.value=val;
-    if(document.activeElement!==numInput) numInput.value=val;
+  function applyVal(val, fromTyping){
+    // Accept both comma and dot as decimal separator
+    if(typeof val==='string') val=val.replace(',','.');
+    const num=parseFloat(val);
+    if(isNaN(num)) return;
+    const clamped=Math.min(Math.max(num,v.min),v.max);
+    S[v.id]=clamped;
+    slider.value=clamped;
+    // Only reformat input if not currently typing
+    if(!fromTyping) numInput.value=String(clamped).replace('.',',');
     S.rho=S.g/S.xi;
     update();
   }
-  slider.addEventListener('input',()=>applyVal(slider.value));
-  numInput.addEventListener('input',()=>applyVal(numInput.value));
-  numInput.addEventListener('change',()=>applyVal(numInput.value));
+  slider.addEventListener('input',()=>{
+    applyVal(slider.value, false);
+    numInput.value=String(S[v.id]).replace('.',',');
+  });
+  numInput.addEventListener('input',()=>applyVal(numInput.value, true));
+  numInput.addEventListener('blur',()=>{
+    applyVal(numInput.value, false);
+    numInput.value=String(S[v.id]).replace('.',',');
+  });
 });
 
 function update(){
