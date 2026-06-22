@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOBCALC</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#111318;--card:#1c1f2e;--border:#272c42;
+  --accent:#4f8ef7;--ok:#3ecf8e;--warn:#f5a623;
+  --text:#e8eaf6;--muted:#7b82a8;--dim:#3e4460;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:14px 12px 40px;max-width:600px;margin:0 auto}
+
+.hdr{margin-bottom:14px}
+.hdr h1{font-size:14px;font-weight:700;margin-bottom:2px}
+.hdr p{font-size:11px;color:var(--muted)}
+
+.panel-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+
+/* ── CONSTRAINT PILL ── */
+.constraint-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.22);
+  border-radius:7px;padding:6px 10px;margin-bottom:8px
+}
+.constraint-pill .eq{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--warn)}
+.constraint-pill .rval{font-size:11px;color:var(--muted);margin-left:auto}
+.constraint-pill .rval span{font-family:'JetBrains Mono',monospace;color:var(--warn);font-weight:600}
+
+/* ── SLIDER ROWS ── */
+.sliders{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.vrow{
+  display:grid;
+  grid-template-columns:1fr 72px 90px;
+  align-items:center;gap:6px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:7px;padding:5px 9px;
+}
+.vrow-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vrow-unit{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:3px;display:block}
+.vrow-input{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:5px;padding:4px 5px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  text-align:right;-moz-appearance:textfield;
+}
+.vrow-input::-webkit-inner-spin-button,
+.vrow-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.vrow-input:focus{outline:none;border-color:var(--accent)}
+
+/* ── RESULTS GRID ── */
+.results-box{
+  background:var(--card);border:1px solid rgba(62,207,142,.3);
+  border-radius:10px;overflow:hidden;
+}
+.res-row{
+  display:grid;grid-template-columns:1fr auto;
+  align-items:center;padding:9px 14px;
+  border-bottom:1px solid var(--border);
+}
+.res-row:last-child{border-bottom:none}
+.res-name{font-size:13px;font-weight:600;color:var(--ok)}
+.res-right{display:flex;align-items:baseline;gap:5px}
+.res-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--ok)}
+.res-unit{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>BOBCALC — Calculadora de Tamaño de Bobinas</h1>
+  <p>Por Sergio Anfossi, MSc — jun 2026</p>
+</div>
+
+
+<div class="panel-title">Variables de entrada</div>
+<div class="sliders" id="sliders"></div>
+
+<div class="panel-title">Resultados</div>
+<div class="results-box">
+  <div class="res-row">
+    <span class="res-name">Masa</span>
+    <div class="res-right"><span class="res-val" id="r_m">—</span><span class="res-unit">kg</span></div>
+  </div>
+  <div class="res-row">
+    <span class="res-name">Metros lineales</span>
+    <div class="res-right"><span class="res-val" id="r_lm">—</span><span class="res-unit">m</span></div>
+  </div>
+  <div class="res-row">
+    <span class="res-name">Metros cuadrados</span>
+    <div class="res-right"><span class="res-val" id="r_m2">—</span><span class="res-unit">m²</span></div>
+  </div>
+  <div class="res-row">
+    <span class="res-name">Unidades</span>
+    <div class="res-right"><span class="res-val" id="r_u">—</span><span class="res-unit">un.</span></div>
+  </div>
+  <div class="res-row">
+    <span class="res-name">Número de vueltas</span>
+    <div class="res-right"><span class="res-val" id="r_n">—</span><span class="res-unit">vueltas</span></div>
+  </div>
+</div>
+
+<script>
+const IND = [
+  {id:'g',   sym:'g', name:'Gramaje',          unit:'g/m²', def:137.95,min:1,  max:500,  step:0.05},
+  {id:'xi',  sym:'ξ', name:'Espesor film',      unit:'µm',   def:121,   min:5,  max:500,  step:1},
+  {id:'w',   sym:'w', name:'Ancho de banda',    unit:'mm',   def:334,   min:10, max:2000, step:1},
+  {id:'b',   sym:'b', name:'Nº de bandas',      unit:'',     def:2,     min:1,  max:40,   step:1},
+  {id:'s',   sym:'s', name:'Paso de taca',      unit:'mm',   def:90,    min:5,  max:2000, step:1},
+  {id:'D',   sym:'D', name:'Diám. ext. bobina', unit:'mm',   def:500,   min:50, max:2000, step:1},
+  {id:'d',   sym:'d', name:'Diám. int. core',   unit:'mm',   def:152,   min:38, max:300,  step:1},
+  {id:'eps', sym:'ε', name:'Espesor del core',  unit:'mm',   def:14.5,  min:1,  max:30,   step:0.5},
+];
+
+const S={};
+IND.forEach(v=>S[v.id]=v.def);
+S.rho=S.g/S.xi;
+
+function fmt(n){
+  if(!isFinite(n)||isNaN(n)||n<=0) return '—';
+  if(n>=1e6)  return n.toLocaleString('es-CL',{maximumFractionDigits:0});
+  if(n>=1000) return n.toLocaleString('es-CL',{maximumFractionDigits:1});
+  if(n>=10)   return n.toLocaleString('es-CL',{maximumFractionDigits:2});
+  return n.toLocaleString('es-CL',{maximumFractionDigits:4});
+}
+
+// Build sliders
+const slidersEl=document.getElementById('sliders');
+IND.forEach(v=>{
+  const row=document.createElement('div');
+  row.className='vrow';
+  const unitLabel=v.unit?'('+v.unit+')':'';
+  row.innerHTML=''
+    +'<div class="vrow-name">'+v.name+'</div>'
+    +'<input type="number" class="vrow-input" id="ni_'+v.id+'" value="'+S[v.id]+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'">' 
+    +'<input type="range" id="sr_'+v.id+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+S[v.id]+'">';
+  slidersEl.appendChild(row);
+
+  const slider=document.getElementById('sr_'+v.id);
+  const numInput=document.getElementById('ni_'+v.id);
+
+  function applyVal(val){
+    val=Math.min(Math.max(parseFloat(val)||v.min,v.min),v.max);
+    S[v.id]=val;
+    slider.value=val;
+    if(document.activeElement!==numInput) numInput.value=val;
+    S.rho=S.g/S.xi;
+    update();
+  }
+  slider.addEventListener('input',()=>applyVal(slider.value));
+  numInput.addEventListener('input',()=>applyVal(numInput.value));
+  numInput.addEventListener('change',()=>applyVal(numInput.value));
+});
+
+function update(){
+  const Re=S.D/2, Ri=(S.d+2*S.eps)/2, xi_mm=S.xi/1e3;
+  const lm=Math.PI*(Re*Re-Ri*Ri)/xi_mm/1e3;
+  const m2=(lm*S.w*S.b)/1e3;
+  const m =(m2*S.g)/1e3;
+  const u =(lm*S.b*1e3)/S.s;
+  const aq=Math.PI*S.xi/1e6, bq=-Math.PI*S.D/1e3;
+  const disc=bq*bq-4*aq*lm;
+  const n=disc>=0?(-bq-Math.sqrt(disc))/(2*aq):NaN;
+
+  document.getElementById('r_m').textContent=fmt(m);
+  document.getElementById('r_lm').textContent=fmt(lm);
+  document.getElementById('r_m2').textContent=fmt(m2);
+  document.getElementById('r_u').textContent=fmt(u);
+  document.getElementById('r_n').textContent=fmt(n);
+}
+
+update();
+</script>
+</body>
+</html>
