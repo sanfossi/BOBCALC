@@ -123,10 +123,11 @@ S.rho=S.g/S.xi;
 
 function fmt(n){
   if(!isFinite(n)||isNaN(n)||n<=0) return '—';
-  if(n>=1e6)  return n.toLocaleString('es-CL',{maximumFractionDigits:0});
-  if(n>=1000) return n.toLocaleString('es-CL',{maximumFractionDigits:1});
-  if(n>=10)   return n.toLocaleString('es-CL',{maximumFractionDigits:2});
-  return n.toLocaleString('es-CL',{maximumFractionDigits:4});
+  const opts = {useGrouping:true};
+  if(n>=1e6)  return n.toLocaleString('es-CL',{...opts,maximumFractionDigits:0});
+  if(n>=1000) return n.toLocaleString('es-CL',{...opts,maximumFractionDigits:1});
+  if(n>=10)   return n.toLocaleString('es-CL',{...opts,maximumFractionDigits:2});
+  return n.toLocaleString('es-CL',{...opts,maximumFractionDigits:4});
 }
 
 // Build sliders
