@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>BOBCALC</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -12,14 +12,14 @@
   --text:#e8eaf6;--muted:#7b82a8;--dim:#3e4460;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:14px 12px 40px;max-width:600px;margin:0 auto}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:6px 10px 16px;max-width:430px;margin:0 auto}
 
-.hdr{margin-bottom:14px}
-.hdr h1{font-size:14px;font-weight:700;margin-bottom:2px}
-.hdr p{font-size:11px;color:var(--muted)}
+.hdr{margin-bottom:5px}
+.hdr h1{font-size:16px;font-weight:700;margin-bottom:0px;text-align:left;width:100%;letter-spacing:-0.3px}
+.hdr p{font-size:10px;color:var(--muted);text-align:left}
 
 .panel-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+  color:var(--muted);margin-bottom:3px;padding-bottom:3px;border-bottom:1px solid var(--border)}
 
 /* ── CONSTRAINT PILL ── */
 .constraint-pill{
@@ -32,13 +32,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;paddi
 .constraint-pill .rval span{font-family:'JetBrains Mono',monospace;color:var(--warn);font-weight:600}
 
 /* ── SLIDER ROWS ── */
-.sliders{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.sliders{display:flex;flex-direction:column;gap:2px;margin-bottom:7px}
 .vrow{
   display:grid;
-  grid-template-columns:1fr 72px 90px;
+  grid-template-columns:1fr 90px 68px;
   align-items:center;gap:6px;
   background:var(--card);border:1px solid var(--border);
-  border-radius:7px;padding:5px 9px;
+  border-radius:6px;padding:3px 8px;
 }
 .vrow-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vrow-unit{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap}
@@ -46,7 +46,7 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:3p
 .vrow-input{
   width:100%;background:var(--bg);border:1px solid var(--border);
   border-radius:5px;padding:4px 5px;color:var(--text);
-  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;
   text-align:right;-moz-appearance:textfield;
 }
 .vrow-input::-webkit-inner-spin-button,
@@ -60,20 +60,20 @@ input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:3p
 }
 .res-row{
   display:grid;grid-template-columns:1fr auto;
-  align-items:center;padding:9px 14px;
+  align-items:center;padding:6px 12px;
   border-bottom:1px solid var(--border);
 }
 .res-row:last-child{border-bottom:none}
-.res-name{font-size:13px;font-weight:600;color:var(--ok)}
+.res-name{font-size:12px;font-weight:600;color:var(--ok)}
 .res-right{display:flex;align-items:baseline;gap:5px}
-.res-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--ok)}
+.res-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--ok)}
 .res-unit{font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
 
 <div class="hdr">
-  <h1>BOBCALC — Calculadora de Tamaño de Bobinas</h1>
+  <h1>Calculadora de Bobinas</h1>
   <p>Por Sergio Anfossi, MSc — jun 2026</p>
 </div>
 
@@ -134,11 +134,11 @@ const slidersEl=document.getElementById('sliders');
 IND.forEach(v=>{
   const row=document.createElement('div');
   row.className='vrow';
-  const unitLabel=v.unit?'('+v.unit+')':'';
+  const unitLabel = v.unit ? ' ('+v.unit+')' : '';
   row.innerHTML=''
-    +'<div class="vrow-name">'+v.name+'</div>'
-    +'<input type="number" class="vrow-input" id="ni_'+v.id+'" value="'+S[v.id]+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'">' 
-    +'<input type="range" id="sr_'+v.id+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+S[v.id]+'">';
+    +'<div class="vrow-name">'+v.name+unitLabel+'</div>'
+    +'<input type="range" id="sr_'+v.id+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+S[v.id]+'">'
+    +'<input type="number" class="vrow-input" id="ni_'+v.id+'" value="'+S[v.id]+'" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'">';
   slidersEl.appendChild(row);
 
   const slider=document.getElementById('sr_'+v.id);
